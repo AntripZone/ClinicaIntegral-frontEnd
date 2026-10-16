@@ -8,6 +8,7 @@ import DoctorsPage from '@/pages/DoctorsPage';
 import AppointmentsPage from '@/pages/AppointmentsPage';
 import UsersPage from '@/pages/UserPage';
 import { Loader2 } from 'lucide-react';
+import PaginaCitas from '@/pages/CitasPage';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { session, loading } = useAuth();

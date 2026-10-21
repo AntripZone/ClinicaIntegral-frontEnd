@@ -1,13 +1,4 @@
-export interface MedicoApi {
-  id: number;
-  nombre: string;
-  apellido: string;
-  email: string;
-  telefono: string | null;
-  numColegiatura: string;
-  activo: boolean;
-  especialidadId: number;
-}
+export type EstadoCita = "PROGRAMADA" | "COMPLETADA" | "CANCELADA";
 
 export interface PacienteApi {
   id: number;
@@ -19,8 +10,35 @@ export interface PacienteApi {
   direccion: string | null;
   fechaRegistro: string;
 }
+
+export type PacienteInput = Omit<PacienteApi, "id" | "fechaRegistro">;
+
+export interface MedicoApi {
+  id: number;
+  nombre: string;
+  apellido: string;
+  email: string;
+  telefono: string | null;
+  numColegiatura: string;
+  activo: boolean;
+  especialidadId: number;
+}
+
 export interface CitaApi {
   id: number;
-  estado: "PROGRAMADA" | "COMPLETADA" | "CANCELADA";
   fechaHora: string;
+  motivo: string | null;
+  estado: EstadoCita;
+  pacienteId: number;
+  medicoId: number;
+  paciente: Pick<PacienteApi, "id" | "nombre" | "apellido">;
+  medico: Pick<MedicoApi, "id" | "nombre" | "apellido">;
+}
+
+export interface CitaInput {
+  pacienteId: number;
+  medicoId: number;
+  fechaHora: string;
+  motivo?: string;
+  notas?: string;
 }

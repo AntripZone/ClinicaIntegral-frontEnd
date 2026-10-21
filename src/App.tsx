@@ -5,6 +5,7 @@ import PatientsPage from '@/pages/PatientsPage';
 import PaginaDetallePaciente from '@/pages/PaginaDetallePaciente';
 import PaginaNuevaCita from '@/pages/PaginaNuevaCita';
 import PaginaNotFound from '@/pages/PaginaNotFound';
+import CitasPage from '@/pages/CitasPage';
 
 export default function App() {
   return (
@@ -12,6 +13,7 @@ export default function App() {
       <Route element={<Layout />}>
         <Route path="/" element={<PaginaDashboard />} />
         <Route path="/pacientes" element={<PatientsPage />} />
+        <Route path="/citas" element={<CitasPage />} />
         <Route path="/pacientes/:id" element={<PaginaDetallePaciente />} />
         <Route path="/citas/nueva" element={<PaginaNuevaCita />} />
         <Route path="*" element={<PaginaNotFound />} />

@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
-import { LayoutDashboard, Users, CalendarPlus, Menu, X } from 'lucide-react';
+import { LayoutDashboard, Users, CalendarPlus, Menu, X, CalendarDays } from 'lucide-react';
 
 const enlaces = [
   { to: '/', label: 'Dashboard', icon: LayoutDashboard },
   { to: '/pacientes', label: 'Pacientes', icon: Users },
   { to: '/citas/nueva', label: 'Nueva cita', icon: CalendarPlus },
+  { to: '/citas', label: 'Citas', icon: CalendarDays },
 ];
 
 export default function Layout() {

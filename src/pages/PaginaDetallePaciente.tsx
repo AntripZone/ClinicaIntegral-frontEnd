@@ -1,67 +1,96 @@
+import { useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { PACIENTES_INICIALES } from '@/types/paciente';
-import type { EstadoPaciente } from '@/types/paciente';
+import { Loader2 } from 'lucide-react';
 import PaginaNotFound from '@/pages/PaginaNotFound';
-
-const estiloPorEstado: Record<EstadoPaciente, string> = {
-  activo: 'bg-emerald-100 text-emerald-700',
-  inactivo: 'bg-slate-100 text-slate-600',
-  en_espera: 'bg-amber-100 text-amber-700',
-};
-
-const etiquetaPorEstado: Record<EstadoPaciente, string> = {
-  activo: 'Activo',
-  inactivo: 'Inactivo',
-  en_espera: 'En espera',
-};
+import { usePacientesStore } from '@/stores/pacientesStore';
+import { useCitasStore } from '@/stores/citasStore';
 
 export default function PaginaDetallePaciente() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const pacienteId = Number(id);
 
-  const paciente = PACIENTES_INICIALES.find(p => p.id === id);
+  const pacientes = usePacientesStore((s) => s.pacientes);
+  const cargandoPacientes = usePacientesStore((s) => s.cargando);
+  const cargarPacientes = usePacientesStore((s) => s.cargar);
 
-  if (!paciente) {
-    return <PaginaNotFound />;
+  const citas = useCitasStore((s) => s.citas);
+  const cargandoCitas = useCitasStore((s) => s.cargando);
+  const citaSeleccionada = useCitasStore((s) => s.citaSeleccionada);
+  const cargarPorPaciente = useCitasStore((s) => s.cargarPorPaciente);
+  const seleccionar = useCitasStore((s) => s.seleccionar);
+
+  useEffect(() => {
+    if (pacientes.length === 0) cargarPacientes();
+  }, [pacientes.length, cargarPacientes]);
+
+  useEffect(() => {
+    if (pacienteId) cargarPorPaciente(pacienteId);
+  }, [pacienteId, cargarPorPaciente]);
+
+  const paciente = pacientes.find((p) => p.id === pacienteId);
+
+  if (!paciente && (cargandoPacientes || pacientes.length === 0)) {
+    return (
+      <div className="flex h-64 items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-teal-600" />
+      </div>
+    );
   }
 
+  if (!paciente) return <PaginaNotFound />;
+
   return (
-    <div className="max-w-xl space-y-6">
-      <button
-        type="button"
-        onClick={() => navigate(-1)}
-        className="text-sm font-medium text-teal-700 hover:underline"
-      >
+    <div className="max-w-2xl space-y-6">
+      <button type="button" onClick={() => navigate(-1)} className="text-sm font-medium text-teal-700 hover:underline">
         ← Volver
       </button>
 
       <div className="rounded-2xl border border-slate-200 bg-white p-6">
-        <div className="flex items-center gap-4">
-          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-teal-50 text-xl font-semibold text-teal-700">
-            {paciente.nombre.charAt(0)}
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold text-slate-800">
-              {paciente.nombre} {paciente.apellido}
-            </h1>
-            <span className={`mt-1 inline-block rounded-full px-2.5 py-1 text-xs font-medium ${estiloPorEstado[paciente.estado]}`}>
-              {etiquetaPorEstado[paciente.estado]}
-            </span>
-          </div>
-        </div>
-
-        <dl className="mt-6 grid grid-cols-[auto_1fr] gap-x-6 gap-y-3 text-sm">
-          <dt className="font-medium text-slate-500">ID</dt>
-          <dd className="text-slate-800">{paciente.id}</dd>
-          <dt className="font-medium text-slate-500">Nombre</dt>
-          <dd className="text-slate-800">{paciente.nombre}</dd>
-          <dt className="font-medium text-slate-500">Apellido</dt>
-          <dd className="text-slate-800">{paciente.apellido}</dd>
+        <h1 className="text-2xl font-bold text-slate-800">{paciente.nombre} {paciente.apellido}</h1>
+        <dl className="mt-4 grid grid-cols-[auto_1fr] gap-x-6 gap-y-2 text-sm">
           <dt className="font-medium text-slate-500">Email</dt>
           <dd className="text-slate-800">{paciente.email}</dd>
-          <dt className="font-medium text-slate-500">Estado</dt>
-          <dd className="text-slate-800">{etiquetaPorEstado[paciente.estado]}</dd>
+          <dt className="font-medium text-slate-500">Teléfono</dt>
+          <dd className="text-slate-800">{paciente.telefono}</dd>
+          <dt className="font-medium text-slate-500">Nacimiento</dt>
+          <dd className="text-slate-800">{paciente.fechaNacimiento.split('T')[0]}</dd>
+          <dt className="font-medium text-slate-500">Dirección</dt>
+          <dd className="text-slate-800">{paciente.direccion ?? '—'}</dd>
         </dl>
+      </div>
+
+      <div className="rounded-2xl border border-slate-200 bg-white p-6">
+        <h2 className="text-lg font-semibold text-slate-800">Citas</h2>
+        {cargandoCitas ? (
+          <Loader2 className="mt-4 h-6 w-6 animate-spin text-teal-600" />
+        ) : citas.length === 0 ? (
+          <p className="mt-2 text-sm text-slate-500">Este paciente no tiene citas.</p>
+        ) : (
+          <ul className="mt-3 divide-y divide-slate-100">
+            {citas.map((c) => (
+              <li key={c.id}>
+                <button
+                  type="button"
+                  onClick={() => seleccionar(c.id)}
+                  className={`w-full rounded-lg px-3 py-2 text-left text-sm hover:bg-slate-50 ${
+                    citaSeleccionada?.id === c.id ? 'bg-teal-50' : ''
+                  }`}
+                >
+                  {new Date(c.fechaHora).toLocaleString('es-PE', { dateStyle: 'medium', timeStyle: 'short' })} · {c.estado}
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+
+        {citaSeleccionada && (
+          <div className="mt-4 rounded-lg bg-slate-50 p-4 text-sm">
+            <p><span className="font-medium">Médico:</span> {citaSeleccionada.medico.nombre} {citaSeleccionada.medico.apellido}</p>
+            <p><span className="font-medium">Motivo:</span> {citaSeleccionada.motivo ?? '—'}</p>
+            <p><span className="font-medium">Estado:</span> {citaSeleccionada.estado}</p>
+          </div>
+        )}
       </div>
     </div>
   );

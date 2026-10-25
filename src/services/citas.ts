@@ -1,8 +1,9 @@
 import { api } from "@/lib/axios";
 import type { CitaApi, CitaInput, EstadoCita } from "@/types/api";
 
-export const getAll = (estado?: EstadoCita) =>
-  api.get<CitaApi[]>("/citas", { params: estado ? { estado } : undefined });
+export const getAll = (
+  filtros: { estado?: EstadoCita; pacienteId?: number } = {},
+) => api.get<CitaApi[]>("/citas", { params: filtros });
 
 export const create = (data: CitaInput) => api.post<CitaApi>("/citas", data);
 

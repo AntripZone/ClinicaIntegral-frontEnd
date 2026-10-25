@@ -4,10 +4,11 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import toast from 'react-hot-toast';
 import { Loader2 } from 'lucide-react';
-import * as pacientesService from '@/services/pacientes';
 import { pacienteSchema, type PacienteFormData } from '@/schemas/pacienteSchema';
 import { extraerMensajeError } from '@/lib/errorHandler';
 import ModalConfirmacion from '@/components/ModalConfimacion';
+import { usePacientesStore } from '@/stores/pacientesStore';
+import { useFiltrosStore } from '@/stores/filtrosStore';
 import type { PacienteApi } from '@/types/api';
 
 const valoresIniciales: PacienteFormData = {
@@ -20,9 +21,16 @@ const valoresIniciales: PacienteFormData = {
 };
 
 export default function PaginaPacientes() {
-  const [pacientes, setPacientes] = useState<PacienteApi[]>([]);
-  const [cargando, setCargando] = useState(true);
-  const [error, setError] = useState(false);
+  const pacientes = usePacientesStore((s) => s.pacientes);
+  const cargando = usePacientesStore((s) => s.cargando);
+  const error = usePacientesStore((s) => s.error);
+  const cargar = usePacientesStore((s) => s.cargar);
+  const crear = usePacientesStore((s) => s.crear);
+  const eliminar = usePacientesStore((s) => s.eliminar);
+
+
+  const query = useFiltrosStore((s) => s.queryPacientes);
+  const setQuery = useFiltrosStore((s) => s.setQueryPacientes);
 
   const [aEliminar, setAEliminar] = useState<PacienteApi | null>(null);
   const [eliminando, setEliminando] = useState(false);
@@ -37,25 +45,14 @@ export default function PaginaPacientes() {
     defaultValues: valoresIniciales,
   });
 
-  const cargarPacientes = () => {
-    setCargando(true);
-    setError(false);
-    pacientesService
-      .getAll()
-      .then((res) => setPacientes(res.data))
-      .catch(() => setError(true))
-      .finally(() => setCargando(false));
-  };
-
-  useEffect(cargarPacientes, []);
+  useEffect(() => {
+    const timer = setTimeout(() => cargar(query), 300);
+    return () => clearTimeout(timer);
+  }, [query, cargar]);
 
   const onSubmit = async (data: PacienteFormData) => {
     try {
-      const res = await pacientesService.create({
-        ...data,
-        direccion: data.direccion?.trim() ? data.direccion : null,
-      });
-      setPacientes((prev) => [...prev, res.data]);
+      await crear({ ...data, direccion: data.direccion?.trim() ? data.direccion : null });
       toast.success('Paciente registrado');
       reset(valoresIniciales);
     } catch (err) {
@@ -67,8 +64,7 @@ export default function PaginaPacientes() {
     if (!aEliminar) return;
     setEliminando(true);
     try {
-      await pacientesService.remove(aEliminar.id);
-      setPacientes((prev) => prev.filter((p) => p.id !== aEliminar.id));
+      await eliminar(aEliminar.id);
       toast.success('Paciente eliminado');
       setAEliminar(null);
     } catch (err) {
@@ -87,14 +83,12 @@ export default function PaginaPacientes() {
     <div className="space-y-6">
       <h1 className="text-2xl font-bold text-slate-800">Pacientes</h1>
 
-      {/* Formulario */}
       <form
         onSubmit={handleSubmit(onSubmit)}
         noValidate
         className="grid gap-4 rounded-2xl border border-slate-200 bg-white p-5 sm:grid-cols-2"
       >
         <h2 className="text-lg font-semibold text-slate-800 sm:col-span-2">Registrar paciente</h2>
-
         {(
           [
             ['nombre', 'Nombre', 'text'],
@@ -106,14 +100,11 @@ export default function PaginaPacientes() {
           ] as const
         ).map(([campo, label, tipo]) => (
           <div key={campo}>
-            <label htmlFor={campo} className="mb-1 block text-sm font-medium text-slate-700">
-              {label}
-            </label>
+            <label htmlFor={campo} className="mb-1 block text-sm font-medium text-slate-700">{label}</label>
             <input id={campo} type={tipo} {...register(campo)} className={claseCampo(!!errors[campo])} />
             {errors[campo] && <p className="mt-1 text-sm text-rose-600">{errors[campo]?.message}</p>}
           </div>
         ))}
-
         <button
           type="submit"
           disabled={isSubmitting}
@@ -123,17 +114,23 @@ export default function PaginaPacientes() {
         </button>
       </form>
 
-      {/* Lista */}
+      <input
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+        placeholder="Buscar por nombre, apellido o email..."
+        className="w-full max-w-sm rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+      />
+
       {cargando ? (
         <div className="flex h-40 items-center justify-center">
           <Loader2 className="h-8 w-8 animate-spin text-teal-600" />
         </div>
       ) : error ? (
         <div className="rounded-2xl border border-rose-200 bg-rose-50 p-8 text-center">
-          <p className="font-medium text-rose-700">No se pudieron cargar los pacientes.</p>
+          <p className="font-medium text-rose-700">No se pudieron cargar los pacientes: {error}</p>
           <button
             type="button"
-            onClick={cargarPacientes}
+            onClick={() => cargar(query)}
             className="mt-4 rounded-lg bg-rose-600 px-4 py-2 text-sm font-semibold text-white hover:bg-rose-700"
           >
             Reintentar
@@ -150,10 +147,7 @@ export default function PaginaPacientes() {
                   <p className="text-sm text-slate-500">{p.email} · {p.telefono}</p>
                 </div>
                 <div className="flex gap-2">
-                  <Link
-                    to={`/pacientes/${p.id}`}
-                    className="rounded-lg px-3 py-1 text-sm font-medium text-teal-700 hover:bg-teal-50"
-                  >
+                  <Link to={`/pacientes/${p.id}`} className="rounded-lg px-3 py-1 text-sm font-medium text-teal-700 hover:bg-teal-50">
                     Ver detalle →
                   </Link>
                   <button

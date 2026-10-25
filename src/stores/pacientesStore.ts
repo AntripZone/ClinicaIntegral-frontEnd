@@ -6,6 +6,9 @@ import type { PacienteApi, PacienteInput } from "@/types/api";
 
 interface PacientesState {
   pacientes: PacienteApi[];
+  total: number;
+  pagina: number;
+  totalPaginas: number;
   cargando: boolean;
   error: string | null;
   cargar: (query?: string) => Promise<void>;
@@ -18,6 +21,9 @@ export const usePacientesStore = create<PacientesState>()(
   devtools(
     (set) => ({
       pacientes: [],
+      total: 0,
+      pagina: 1,
+      totalPaginas: 1,
       cargando: false,
       error: null,
 
@@ -26,7 +32,13 @@ export const usePacientesStore = create<PacientesState>()(
         try {
           const res = await pacientesService.getAll(query);
           set(
-            { pacientes: res.data, cargando: false },
+            {
+              pacientes: res.data.data,
+              total: res.data.total,
+              pagina: res.data.pagina,
+              totalPaginas: res.data.totalPaginas,
+              cargando: false,
+            },
             false,
             "pacientes/cargar:ok",
           );
@@ -42,7 +54,10 @@ export const usePacientesStore = create<PacientesState>()(
       crear: async (data) => {
         const res = await pacientesService.create(data);
         set(
-          (s) => ({ pacientes: [...s.pacientes, res.data] }),
+          (s) => ({
+            pacientes: [...s.pacientes, res.data],
+            total: s.total + 1,
+          }),
           false,
           "pacientes/crear",
         );
@@ -62,7 +77,10 @@ export const usePacientesStore = create<PacientesState>()(
       eliminar: async (id) => {
         await pacientesService.remove(id);
         set(
-          (s) => ({ pacientes: s.pacientes.filter((p) => p.id !== id) }),
+          (s) => ({
+            pacientes: s.pacientes.filter((p) => p.id !== id),
+            total: s.total - 1,
+          }),
           false,
           "pacientes/eliminar",
         );

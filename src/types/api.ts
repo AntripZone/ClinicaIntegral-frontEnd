@@ -42,3 +42,10 @@ export interface CitaInput {
   motivo?: string;
   notas?: string;
 }
+
+export interface RespuestaPaginada<T> {
+  data: T[];
+  total: number;
+  pagina: number;
+  totalPaginas: number;
+}

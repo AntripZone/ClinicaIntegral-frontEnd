@@ -3,7 +3,8 @@ import { Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import toast from 'react-hot-toast';
-import { Loader2 } from 'lucide-react';
+import { Loader2, X } from 'lucide-react';
+import { useDebounce } from '@/hooks/useDebounce';
 import { pacienteSchema, type PacienteFormData } from '@/schemas/pacienteSchema';
 import { extraerMensajeError } from '@/lib/errorHandler';
 import ModalConfirmacion from '@/components/ModalConfimacion';
@@ -22,6 +23,8 @@ const valoresIniciales: PacienteFormData = {
 
 export default function PaginaPacientes() {
   const pacientes = usePacientesStore((s) => s.pacientes);
+  const total = usePacientesStore((s) => s.total)
+  const resetFiltros = useFiltrosStore((s) => s.resetFiltros);
   const cargando = usePacientesStore((s) => s.cargando);
   const error = usePacientesStore((s) => s.error);
   const cargar = usePacientesStore((s) => s.cargar);
@@ -45,10 +48,13 @@ export default function PaginaPacientes() {
     defaultValues: valoresIniciales,
   });
 
+  const queryDebounced = useDebounce(query, 350);
+
   useEffect(() => {
-    const timer = setTimeout(() => cargar(query), 300);
-    return () => clearTimeout(timer);
-  }, [query, cargar]);
+    cargar(queryDebounced || undefined);
+  }, [queryDebounced, cargar]);
+
+  const buscando = query !== queryDebounced || cargando;
 
   const onSubmit = async (data: PacienteFormData) => {
     try {
@@ -113,6 +119,8 @@ export default function PaginaPacientes() {
           {isSubmitting ? 'Registrando...' : 'Registrar'}
         </button>
       </form>
+      <div className="flex flex-wrap items-center gap-3">
+        <div className="relative w-full max-w-sm">
 
       <input
         value={query}
@@ -120,8 +128,21 @@ export default function PaginaPacientes() {
         placeholder="Buscar por nombre, apellido o email..."
         className="w-full max-w-sm rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
       />
-
-      {cargando ? (
+      {buscando && (
+      <Loader2 className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-teal-600" />
+      )}
+      </div>
+      <button
+        type="button"
+        onClick={resetFiltros}
+        disabled={!query}
+        className="inline-flex items-center gap-1 rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-700 hover:bg-slate-100 disabled:opacity-50"
+      >
+        <X className="h-4 w-4" />
+        Limpiar filtros
+      </button>
+    </div>
+      {cargando && pacientes.length === 0 ? (
         <div className="flex h-40 items-center justify-center">
           <Loader2 className="h-8 w-8 animate-spin text-teal-600" />
         </div>
@@ -138,7 +159,7 @@ export default function PaginaPacientes() {
         </div>
       ) : (
         <>
-          <p className="text-sm text-slate-500">{pacientes.length} paciente(s) registrado(s)</p>
+          <p className="text-sm text-slate-500">{total} paciente(s) registrado(s)</p>
           <ul className="divide-y divide-slate-100 rounded-2xl border border-slate-200 bg-white">
             {pacientes.map((p) => (
               <li key={p.id} className="flex flex-wrap items-center justify-between gap-3 p-4">

@@ -1,9 +1,13 @@
 import { api } from "@/lib/axios";
-import type { PacienteApi, PacienteInput } from "@/types/api";
+import type {
+  PacienteApi,
+  PacienteInput,
+  RespuestaPaginada,
+} from "@/types/api";
 
-export const getAll = (query?: string) =>
-  api.get<PacienteApi[]>("/pacientes", {
-    params: query ? { query } : undefined,
+export const getAll = (query?: string, pagina = 1) =>
+  api.get<RespuestaPaginada<PacienteApi>>("/pacientes", {
+    params: { query: query || undefined, pagina },
   });
 
 export const create = (data: PacienteInput) =>

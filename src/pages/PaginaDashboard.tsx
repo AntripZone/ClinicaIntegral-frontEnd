@@ -1,41 +1,25 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { MetricCard } from '../components/MetricCard';
 import { StatusBadge } from '../components/StatusBadge';
+import { useApi } from '@/hooks/useApi';
 import type { Metrica } from '../types';
-import type { CitaApi, MedicoApi, PacienteApi } from '@/types/api';
-import { api } from '@/lib/axios';
+import type { CitaApi, MedicoApi, PacienteApi, RespuestaPaginada } from '@/types/api';
 
 export function PaginaDashboard() {
   const navigate = useNavigate();
+  const pacientes = useApi<RespuestaPaginada<PacienteApi>>('/pacientes?limite=1');
+  const medicos = useApi<MedicoApi[]>('/medicos');
+  const programadas = useApi<CitaApi[]>('/citas?estado=PROGRAMADA');
+  const completadas = useApi<CitaApi[]>('/citas?estado=COMPLETADA');
 
-  const [totalPacientes, setTotalPacientes] = useState<number | null>(null);
-  const [totalMedicos, setTotalMedicos] = useState<number | null>(null);
-  const [citasProgramadas, setCitasProgramadas] = useState<number | null>(null);
-  const [citasCompletadas, setCitasCompletadas] = useState<number | null>(null);
   const [mantenimiento, setMantenimiento] = useState<boolean>(false);
-
-  useEffect(() => {
-    api.get<PacienteApi[]>('/pacientes').then((res) => setTotalPacientes(res.data.length));
-  }, []);
-
-  useEffect(() => {
-    api.get<MedicoApi[]>('/medicos').then((res) => setTotalMedicos(res.data.length));
-  }, []);
-
-  useEffect(() => {
-    api.get<CitaApi[]>('/citas?estado=PROGRAMADA').then((res) => setCitasProgramadas(res.data.length));
-  }, []);
-
-  useEffect(() => {
-    api.get<CitaApi[]>('/citas?estado=COMPLETADA').then((res) => setCitasCompletadas(res.data.length));
-  }, []);
 
   const metricas: Metrica[] = [
     {
       id: 'pacientes',
       titulo: 'Pacientes',
-      valor: totalPacientes ?? '…',
+      valor: pacientes.data?.total ?? '…',
       descripcion: 'Registrados en el sistema',
       tendencia: 'positiva',
       icono: '🧑‍⚕️',
@@ -43,7 +27,7 @@ export function PaginaDashboard() {
     {
       id: 'medicos',
       titulo: 'Médicos',
-      valor: totalMedicos ?? '…',
+      valor: medicos.data?.length ?? '…',
       descripcion: 'En el staff',
       tendencia: 'neutra',
       icono: '🩺',
@@ -51,7 +35,7 @@ export function PaginaDashboard() {
     {
       id: 'citas-programadas',
       titulo: 'Citas Programadas',
-      valor: citasProgramadas ?? '…',
+      valor: programadas.data?.length ?? '…',
       descripcion: 'Pendientes de atención',
       tendencia: 'neutra',
       icono: '📅',
@@ -59,7 +43,7 @@ export function PaginaDashboard() {
     {
       id: 'citas-completadas',
       titulo: 'Completadas Hoy',
-      valor: citasCompletadas ?? '…',
+      valor: completadas.data?.length ?? '…',
       descripcion: 'Atenciones finalizadas',
       tendencia: 'positiva',
       icono: '✅',

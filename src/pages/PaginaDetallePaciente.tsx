@@ -4,6 +4,8 @@ import { Loader2 } from 'lucide-react';
 import PaginaNotFound from '@/pages/PaginaNotFound';
 import { usePacientesStore } from '@/stores/pacientesStore';
 import { useCitasStore } from '@/stores/citasStore';
+import { useApi } from '@/hooks/useApi';
+import type { PacienteApi } from '@/types/api';
 
 export default function PaginaDetallePaciente() {
   const { id } = useParams<{ id: string }>();
@@ -13,6 +15,8 @@ export default function PaginaDetallePaciente() {
   const pacientes = usePacientesStore((s) => s.pacientes);
   const cargandoPacientes = usePacientesStore((s) => s.cargando);
   const cargarPacientes = usePacientesStore((s) => s.cargar);
+
+  const { data: paciente, cargando: cargandoPaciente } = useApi<PacienteApi>(`/pacientes/${id}`);
 
   const citas = useCitasStore((s) => s.citas);
   const cargandoCitas = useCitasStore((s) => s.cargando);
@@ -28,7 +32,13 @@ export default function PaginaDetallePaciente() {
     if (pacienteId) cargarPorPaciente(pacienteId);
   }, [pacienteId, cargarPorPaciente]);
 
-  const paciente = pacientes.find((p) => p.id === pacienteId);
+  if (cargandoPaciente) {
+    return (
+      <div className="flex h-64 items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-teal-600" />
+      </div>
+    );
+  }
 
   if (!paciente && (cargandoPacientes || pacientes.length === 0)) {
     return (

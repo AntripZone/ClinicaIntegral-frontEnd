@@ -7,10 +7,12 @@ import PaginaNuevaCita from '@/pages/PaginaNuevaCita';
 import PaginaNotFound from '@/pages/PaginaNotFound';
 import CitasPage from '@/pages/CitasPage';
 import PaginaReportes from '@/pages/PaginaReportes';
+import PaginaLogin from '@/pages/PaginaLogin';
 
 export default function App() {
   return (
     <Routes>
+      <Route path="/login" element={<PaginaLogin />} />
       <Route element={<Layout />}>
         <Route path="/" element={<PaginaDashboard />} />
         <Route path="/pacientes" element={<PatientsPage />} />

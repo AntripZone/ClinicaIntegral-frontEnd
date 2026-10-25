@@ -8,10 +8,7 @@ export function hoyISO(): string {
 }
 
 export const citaSchema = z.object({
-  pacienteNombre: z
-    .string()
-    .trim()
-    .min(3, "El nombre debe tener al menos 3 caracteres"),
+  pacienteId: z.string().min(1, "Selecciona un paciente"),
 
   medicoId: z.string().min(1, "Selecciona un médico"),
 

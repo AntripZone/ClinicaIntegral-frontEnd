@@ -10,9 +10,6 @@ export interface PacienteApi {
   direccion: string | null;
   fechaRegistro: string;
 }
-
-export type PacienteInput = Omit<PacienteApi, "id" | "fechaRegistro">;
-
 export interface MedicoApi {
   id: number;
   nombre: string;
@@ -28,6 +25,7 @@ export interface CitaApi {
   id: number;
   fechaHora: string;
   motivo: string | null;
+  notas: string | null;
   estado: EstadoCita;
   pacienteId: number;
   medicoId: number;
@@ -35,17 +33,14 @@ export interface CitaApi {
   medico: Pick<MedicoApi, "id" | "nombre" | "apellido">;
 }
 
-export interface CitaInput {
-  pacienteId: number;
-  medicoId: number;
-  fechaHora: string;
-  motivo?: string;
-  notas?: string;
-}
-
 export interface RespuestaPaginada<T> {
   data: T[];
   total: number;
   pagina: number;
   totalPaginas: number;
+}
+
+export interface CitasPorEspecialidad {
+  especialidad: string;
+  total: number;
 }

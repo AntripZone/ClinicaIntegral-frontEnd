@@ -1,19 +1,16 @@
 import { api } from "@/lib/axios";
-import type {
-  PacienteApi,
-  PacienteInput,
-  RespuestaPaginada,
-} from "@/types/api";
+import type { PacienteApi, RespuestaPaginada } from "@/types/api";
+import type { ActualizarPacienteDTO, CrearPacienteDTO } from "@/types/dtos";
 
 export const getAll = (query?: string, pagina = 1) =>
   api.get<RespuestaPaginada<PacienteApi>>("/pacientes", {
     params: { query: query || undefined, pagina },
   });
 
-export const create = (data: PacienteInput) =>
+export const create = (data: CrearPacienteDTO) =>
   api.post<PacienteApi>("/pacientes", data);
 
-export const update = (id: number, data: Partial<PacienteInput>) =>
+export const update = (id: number, data: Partial<ActualizarPacienteDTO>) =>
   api.patch<PacienteApi>(`/pacientes/${id}`, data);
 
 export const remove = (id: number) =>

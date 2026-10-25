@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { MetricCard } from '../components/MetricCard';
 import { StatusBadge } from '../components/StatusBadge';
 import { useApi } from '@/hooks/useApi';
@@ -84,6 +84,11 @@ export function PaginaDashboard() {
           <MetricCard key={metrica.id} metrica={metrica} />
         ))}
       </section>
+      <div className="mt-6">
+        <Link to="/reportes" className="text-sm font-semibold text-teal-700 hover:underline">
+          Ver reportes completos →
+        </Link>
+      </div>
     </div>
   );
 }

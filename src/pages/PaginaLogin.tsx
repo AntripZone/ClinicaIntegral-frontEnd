@@ -3,17 +3,13 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { api } from '@/lib/axios';
+import { loginSchema, type LoginFormData } from '@/schemas/loginSchema';
+import { login } from '@/services/auth';
+import { useAuthStore } from '@/stores/authStore';
 import { extraerMensajeError } from '@/lib/errorHandler';
 
-const loginSchema = z.object({
-  email: z.email('Email inválido'),
-  password: z.string().min(6, 'Mínimo 6 caracteres'),
-});
-
-type LoginFormData = z.infer<typeof loginSchema>;
-
 export default function PaginaLogin() {
+  const setAuth = useAuthStore((s) => s.login);
   const navigate = useNavigate();
 
   const {
@@ -22,11 +18,11 @@ export default function PaginaLogin() {
     formState: { errors, isSubmitting },
   } = useForm<LoginFormData>({ resolver: zodResolver(loginSchema) });
 
-  const onSubmit = async ({ email, password }: LoginFormData) => {
+  const onSubmit = async (datos: LoginFormData) => {
     try {
-      const res = await api.post<{ token: string }>('/auth/login', { email, passwordHash: password });
-      localStorage.setItem('token', res.data.token);
-      toast.success('Sesión iniciada');
+      const { token, usuario } = await login(datos);
+      setAuth(token, usuario);
+      toast.success('Bienvenido');
       navigate('/', { replace: true });
     } catch (err) {
       toast.error(extraerMensajeError(err));

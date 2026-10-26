@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { NavLink, Outlet } from 'react-router-dom';
-import { LayoutDashboard, Users, CalendarPlus, Menu, X, CalendarDays, BarChart3 } from 'lucide-react';
+import { NavLink, Outlet, useNavigate } from 'react-router-dom';
+import { LayoutDashboard, Users, CalendarPlus, Menu, X, CalendarDays, BarChart3, LogOut } from 'lucide-react';
+import { useAuthStore } from '@/stores/authStore';
 
 const enlaces = [
   { to: '/', label: 'Dashboard', icon: LayoutDashboard },
@@ -11,11 +12,19 @@ const enlaces = [
 ];
 
 export default function Layout() {
+  const usuario = useAuthStore((s) => s.usuario);
+  const logout = useAuthStore((s) => s.logout);
+  const navigate = useNavigate();
+
+  const cerrarSesion = () => {
+    logout();
+    navigate('/login', { replace: true });
+  };
+
   const [menuAbierto, setMenuAbierto] = useState(false);
 
   return (
     <div className="flex min-h-screen bg-slate-50">
-      {/* Fondo oscuro en móvil */}
       {menuAbierto && (
         <div
           className="fixed inset-0 z-30 bg-slate-900/40 lg:hidden"
@@ -23,7 +32,6 @@ export default function Layout() {
         />
       )}
 
-      {/* Sidebar */}
       <aside
         className={`fixed top-0 left-0 z-40 flex h-screen w-64 flex-col border-r border-slate-200 bg-white transition-transform lg:sticky lg:translate-x-0 ${
           menuAbierto ? 'translate-x-0' : '-translate-x-full'
@@ -61,6 +69,21 @@ export default function Layout() {
             </NavLink>
           ))}
         </nav>
+        <div className="border-t border-slate-200 p-3">
+          {usuario && (
+            <p className="truncate px-3 pb-2 text-xs text-slate-500">
+              {usuario.email} · {usuario.rol}
+            </p>
+          )}
+          <button
+            type="button"
+            onClick={cerrarSesion}
+            className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-slate-600 hover:bg-rose-50 hover:text-rose-700"
+          >
+            <LogOut className="h-5 w-5" />
+            Cerrar sesión
+          </button>
+        </div>
       </aside>
 
       {/* Contenido */}

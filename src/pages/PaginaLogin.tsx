@@ -1,7 +1,6 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Navigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { loginSchema, type LoginFormData } from '@/schemas/loginSchema';
 import { login } from '@/services/auth';
@@ -11,6 +10,8 @@ import { extraerMensajeError } from '@/lib/errorHandler';
 export default function PaginaLogin() {
   const setAuth = useAuthStore((s) => s.login);
   const navigate = useNavigate();
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+    if (isAuthenticated) return <Navigate to="/" replace />;
 
   const {
     register,

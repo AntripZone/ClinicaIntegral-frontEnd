@@ -16,7 +16,7 @@ export default function Layout() {
   const logout = useAuthStore((s) => s.logout);
   const navigate = useNavigate();
 
-  const cerrarSesion = () => {
+  const handleLogout = () => {
     logout();
     navigate('/login', { replace: true });
   };
@@ -26,10 +26,36 @@ export default function Layout() {
   return (
     <div className="flex min-h-screen bg-slate-50">
       {menuAbierto && (
-        <div
-          className="fixed inset-0 z-30 bg-slate-900/40 lg:hidden"
-          onClick={() => setMenuAbierto(false)}
-        />
+       <header className="sticky top-0 z-20 flex h-16 items-center justify-between gap-3 border-b border-slate-200 bg-white px-4 lg:px-8">
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => setMenuAbierto(true)}
+              className="rounded-lg p-2 text-slate-600 hover:bg-slate-100 lg:hidden"
+              aria-label="Abrir menú"
+            >
+              <Menu className="h-5 w-5" />
+            </button>
+            <span className="font-bold text-slate-800 lg:hidden">MediClinic</span>
+          </div>
+
+          <div className="flex items-center gap-3">
+            {usuario && (
+              <div className="text-right leading-tight">
+                <p className="max-w-[12rem] truncate text-sm font-medium text-slate-800">{usuario.email}</p>
+                <p className="text-xs text-slate-500">{usuario.rol}</p>
+              </div>
+            )}
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="inline-flex items-center gap-2 rounded-lg border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-rose-50 hover:text-rose-700"
+            >
+              <LogOut className="h-4 w-4" />
+              <span className="hidden sm:inline">Cerrar sesión</span>
+            </button>
+          </div>
+        </header>
       )}
 
       <aside
@@ -50,7 +76,9 @@ export default function Layout() {
         </div>
 
         <nav className="flex-1 space-y-1 px-3">
-          {enlaces.map(({ to, label, icon: Icono }) => (
+          {enlaces
+            .filter((e) => e.to !== '/reportes' || usuario?.rol == 'GERENCIA')
+            .map(({ to, label, icon: Icono }) => (
             <NavLink
               key={to}
               to={to}
@@ -69,21 +97,6 @@ export default function Layout() {
             </NavLink>
           ))}
         </nav>
-        <div className="border-t border-slate-200 p-3">
-          {usuario && (
-            <p className="truncate px-3 pb-2 text-xs text-slate-500">
-              {usuario.email} · {usuario.rol}
-            </p>
-          )}
-          <button
-            type="button"
-            onClick={cerrarSesion}
-            className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-slate-600 hover:bg-rose-50 hover:text-rose-700"
-          >
-            <LogOut className="h-5 w-5" />
-            Cerrar sesión
-          </button>
-        </div>
       </aside>
 
       {/* Contenido */}

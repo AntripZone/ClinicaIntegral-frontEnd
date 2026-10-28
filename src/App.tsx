@@ -8,19 +8,29 @@ import PaginaNotFound from '@/pages/PaginaNotFound';
 import CitasPage from '@/pages/CitasPage';
 import PaginaReportes from '@/pages/PaginaReportes';
 import PaginaLogin from '@/pages/PaginaLogin';
+import PaginaSinAcceso from '@/pages/PaginaSinAcceso';
+import RutaProtegida from '@/components/RutaProtegida';
 
 export default function App() {
   return (
     <Routes>
       <Route path="/login" element={<PaginaLogin />} />
+
+      <Route element={<RutaProtegida />}>
       <Route element={<Layout />}>
         <Route path="/" element={<PaginaDashboard />} />
         <Route path="/pacientes" element={<PatientsPage />} />
         <Route path="/citas" element={<CitasPage />} />
         <Route path="/pacientes/:id" element={<PaginaDetallePaciente />} />
         <Route path="/citas/nueva" element={<PaginaNuevaCita />} />
-        <Route path="/reportes" element={<PaginaReportes />} />
+        <Route path="/sin-acceso" element={<PaginaSinAcceso />} />
+
+        <Route element={<RutaProtegida rolesPermitidos={['GERENCIA']} />}>
+           <Route path="/reportes" element={<PaginaReportes />} />
+        </Route>
+
         <Route path="*" element={<PaginaNotFound />} />
+      </Route>
       </Route>
     </Routes>
   );

@@ -5,8 +5,18 @@ export type Rol = "RECEPCIONISTA" | "MEDICO" | "GERENCIA";
 
 export interface UsuarioSesion {
   id: number;
+  nombre: string | null;
   email: string;
   rol: Rol;
+  telefono: string | null;
+  fotoUrl: string | null;
+}
+
+export async function actualizarPerfil(
+  formData: FormData,
+): Promise<UsuarioSesion> {
+  const { data } = await api.put<UsuarioSesion>("/auth/perfil", formData);
+  return data;
 }
 
 export interface LoginResponse {

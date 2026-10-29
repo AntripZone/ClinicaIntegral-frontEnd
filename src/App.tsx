@@ -10,6 +10,7 @@ import PaginaReportes from '@/pages/PaginaReportes';
 import PaginaLogin from '@/pages/PaginaLogin';
 import PaginaSinAcceso from '@/pages/PaginaSinAcceso';
 import RutaProtegida from '@/components/RutaProtegida';
+import PaginaPerfil from '@/pages/PaginaPerfil';
 
 export default function App() {
   return (
@@ -24,6 +25,7 @@ export default function App() {
         <Route path="/pacientes/:id" element={<PaginaDetallePaciente />} />
         <Route path="/citas/nueva" element={<PaginaNuevaCita />} />
         <Route path="/sin-acceso" element={<PaginaSinAcceso />} />
+        <Route path="/perfil" element={<PaginaPerfil />} />
 
         <Route element={<RutaProtegida rolesPermitidos={['GERENCIA']} />}>
            <Route path="/reportes" element={<PaginaReportes />} />

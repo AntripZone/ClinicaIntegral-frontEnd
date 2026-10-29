@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { NavLink, Outlet, useNavigate } from 'react-router-dom';
+import { NavLink, Outlet, useNavigate, Link } from 'react-router-dom';
 import { LayoutDashboard, Users, CalendarPlus, Menu, X, CalendarDays, BarChart3, LogOut } from 'lucide-react';
 import { useAuthStore } from '@/stores/authStore';
+import { urlArchivo } from '@/lib/urls';
 
 const enlaces = [
   { to: '/', label: 'Dashboard', icon: LayoutDashboard },
@@ -41,10 +42,28 @@ export default function Layout() {
 
           <div className="flex items-center gap-3">
             {usuario && (
-              <div className="text-right leading-tight">
-                <p className="max-w-[12rem] truncate text-sm font-medium text-slate-800">{usuario.email}</p>
-                <p className="text-xs text-slate-500">{usuario.rol}</p>
-              </div>
+              <Link
+                to="/perfil"
+                className="flex items-center gap-3 rounded-lg px-2 py-1 hover:bg-slate-100"
+              >
+                <div className="text-right leading-tight">
+                  <p className="max-w-[12rem] truncate text-sm font-medium text-slate-800">
+                    {usuario.nombre ?? usuario.email}
+                  </p>
+                  <p className="text-xs text-slate-500">{usuario.rol}</p>
+                </div>
+                {usuario.fotoUrl ? (
+                  <img
+                    src={urlArchivo(usuario.fotoUrl)}
+                    alt=""
+                    className="h-9 w-9 rounded-full object-cover"
+                  />
+                ) : (
+                  <span className="flex h-9 w-9 items-center justify-center rounded-full bg-teal-100 text-sm font-semibold text-teal-700">
+                    {(usuario.nombre ?? usuario.email).charAt(0).toUpperCase()}
+                  </span>
+                )}
+              </Link>
             )}
             <button
               type="button"

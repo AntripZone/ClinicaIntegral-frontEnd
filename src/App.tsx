@@ -11,6 +11,7 @@ import PaginaLogin from '@/pages/PaginaLogin';
 import PaginaSinAcceso from '@/pages/PaginaSinAcceso';
 import RutaProtegida from '@/components/RutaProtegida';
 import PaginaPerfil from '@/pages/PaginaPerfil';
+import PaginaHistorialCitas from '@/pages/PaginaHistorialCitas';
 
 export default function App() {
   return (
@@ -26,6 +27,7 @@ export default function App() {
         <Route path="/citas/nueva" element={<PaginaNuevaCita />} />
         <Route path="/sin-acceso" element={<PaginaSinAcceso />} />
         <Route path="/perfil" element={<PaginaPerfil />} />
+        <Route path="/citas/historial" element={<PaginaHistorialCitas />} />
 
         <Route element={<RutaProtegida rolesPermitidos={['GERENCIA']} />}>
            <Route path="/reportes" element={<PaginaReportes />} />

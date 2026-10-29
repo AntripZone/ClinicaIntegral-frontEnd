@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { NavLink, Outlet, useNavigate, Link } from 'react-router-dom';
-import { LayoutDashboard, Users, CalendarPlus, Menu, X, CalendarDays, BarChart3, LogOut } from 'lucide-react';
+import { History,LayoutDashboard, Users, CalendarPlus, Menu, X, CalendarDays, BarChart3, LogOut } from 'lucide-react';
 import { useAuthStore } from '@/stores/authStore';
 import { urlArchivo } from '@/lib/urls';
 
@@ -10,6 +10,7 @@ const enlaces = [
   { to: '/citas/nueva', label: 'Nueva cita', icon: CalendarPlus },
   { to: '/citas', label: 'Citas', icon: CalendarDays },
   { to: '/reportes', label: 'Reportes', icon: BarChart3 },
+  { to: '/citas/historial', label: 'Historial', icon: History },
 ];
 
 export default function Layout() {

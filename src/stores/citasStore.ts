@@ -22,7 +22,7 @@ export const useCitasStore = create<CitasState>()(
     (set, get) => ({
       citas: [],
       citaSeleccionada: null,
-      cargando: false,
+      cargando: true,
       error: null,
 
       cargar: async (estado) => {

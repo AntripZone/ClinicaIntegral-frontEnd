@@ -1,6 +1,12 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { Loader2 } from 'lucide-react';
+import {
+  AlertaBanner,
+  EstadoVacio,
+  ModalConfirmacion,
+  SkeletonCitaRow,
+} from '@/shared/components/ui';
 import { useCitasStore } from '@/stores/citasStore';
 import { useFiltrosStore } from '@/stores/filtrosStore';
 import type { EstadoCita } from '@/types/api';
@@ -18,11 +24,15 @@ const etiquetaPorEstado: Record<EstadoCita, string> = {
 };
 
 export default function PaginaCitas() {
+  const navigate = useNavigate();
   const citas = useCitasStore((s) => s.citas);
   const cargando = useCitasStore((s) => s.cargando);
   const error = useCitasStore((s) => s.error);
   const cargar = useCitasStore((s) => s.cargar);
   const actualizarEstado = useCitasStore((s) => s.actualizarEstado);
+
+  const [aCancelar, setACancelar] = useState<number | null>(null);
+  const [cancelando, setCancelando] = useState(false);
 
   const estadoFiltro = useFiltrosStore((s) => s.estadoCitaFiltro);
   const setEstadoFiltro = useFiltrosStore((s) => s.setEstadoCita);
@@ -34,7 +44,25 @@ export default function PaginaCitas() {
   }, [estadoFiltro, cargar]);
 
   const cambiarEstado = (id: number, estado: EstadoCita) => {
+    if (estado === 'CANCELADA') {
+      setACancelar(id);
+      return;
+    }
     actualizarEstado(id, estado).catch(() => toast.error('Cambio revertido'));
+  };
+
+  const confirmarCancelacion = async () => {
+    if (aCancelar === null) return;
+    setCancelando(true);
+    try {
+      await actualizarEstado(aCancelar, 'CANCELADA');
+      toast.success('Cita cancelada');
+    } catch {
+      toast.error('Cambio revertido');
+    } finally {
+      setCancelando(false);
+      setACancelar(null);
+    }
   };
 
   return (
@@ -54,20 +82,25 @@ export default function PaginaCitas() {
       </div>
 
       {cargando ? (
-        <div className="flex h-64 items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin text-teal-600" />
-        </div>
+       <ul className="divide-y divide-slate-100 rounded-2xl border border-slate-200 bg-white">
+          {Array.from({ length: 5 }, (_, i) => <SkeletonCitaRow key={i} />)}
+       </ul>
       ) : error ? (
-        <div className="rounded-2xl border border-rose-200 bg-rose-50 p-8 text-center">
-          <p className="font-medium text-rose-700">No se pudieron cargar las citas: {error}</p>
-          <button
-            type="button"
-            onClick={recargar}
-            className="mt-4 rounded-lg bg-rose-600 px-4 py-2 text-sm font-semibold text-white hover:bg-rose-700"
-          >
-            Reintentar
-          </button>
-        </div>
+        <AlertaBanner
+          tipo="error"
+          titulo="No se pudieron cargar las citas"
+          mensaje={error}
+          accion={{ label: 'Reintentar', onClick: recargar }}
+        />
+      ) : citas.length === 0 ? (
+         <EstadoVacio
+            titulo="No hay citas con este filtro"
+            accion={
+              estadoFiltro === 'Todos'
+                ? { label: 'Agendar cita', onClick: () => navigate('/citas/nueva') }
+                : { label: 'Ver todos los estados', onClick: () => setEstadoFiltro('Todos') }
+            }
+          />
       ) : (
         <>
           <p className="text-sm text-slate-500">{citas.length} cita(s)</p>
@@ -100,6 +133,16 @@ export default function PaginaCitas() {
           </ul>
         </>
       )}
+      <ModalConfirmacion
+        abierto={aCancelar !== null}
+        titulo="Cancelar cita"
+        mensaje="¿Seguro que quieres cancelar esta cita? El paciente perderá su horario."
+        textoConfirmar="Cancelar cita"
+        textoCargando="Cancelando..."
+        cargando={cancelando}
+        onConfirmar={confirmarCancelacion}
+        onCancelar={() => setACancelar(null)}
+      />
     </div>
   );
 }

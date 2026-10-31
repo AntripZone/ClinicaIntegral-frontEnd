@@ -1,20 +1,15 @@
 import { useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Loader2 } from 'lucide-react';
 import PaginaNotFound from '@/pages/PaginaNotFound';
-import { usePacientesStore } from '@/stores/pacientesStore';
 import { useCitasStore } from '@/stores/citasStore';
 import { useApi } from '@/hooks/useApi';
 import type { PacienteApi } from '@/types/api';
+import { Spinner } from '@/shared/components/ui';
 
 export default function PaginaDetallePaciente() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const pacienteId = Number(id);
-
-  const pacientes = usePacientesStore((s) => s.pacientes);
-  const cargandoPacientes = usePacientesStore((s) => s.cargando);
-  const cargarPacientes = usePacientesStore((s) => s.cargar);
 
   const { data: paciente, cargando: cargandoPaciente } = useApi<PacienteApi>(`/pacientes/${id}`);
 
@@ -25,28 +20,11 @@ export default function PaginaDetallePaciente() {
   const seleccionar = useCitasStore((s) => s.seleccionar);
 
   useEffect(() => {
-    if (pacientes.length === 0) cargarPacientes();
-  }, [pacientes.length, cargarPacientes]);
-
-  useEffect(() => {
     if (pacienteId) cargarPorPaciente(pacienteId);
   }, [pacienteId, cargarPorPaciente]);
 
-  if (cargandoPaciente) {
-    return (
-      <div className="flex h-64 items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-teal-600" />
-      </div>
-    );
-  }
-
-  if (!paciente && (cargandoPacientes || pacientes.length === 0)) {
-    return (
-      <div className="flex h-64 items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-teal-600" />
-      </div>
-    );
-  }
+  if (cargandoPaciente)
+    return <Spinner fullscreen etiqueta="Cargando paciente" />;
 
   if (!paciente) return <PaginaNotFound />;
 
@@ -73,7 +51,7 @@ export default function PaginaDetallePaciente() {
       <div className="rounded-2xl border border-slate-200 bg-white p-6">
         <h2 className="text-lg font-semibold text-slate-800">Citas</h2>
         {cargandoCitas ? (
-          <Loader2 className="mt-4 h-6 w-6 animate-spin text-teal-600" />
+          <div className="mt-4"><Spinner etiqueta="Cargando citas" /></div>
         ) : citas.length === 0 ? (
           <p className="mt-2 text-sm text-slate-500">Este paciente no tiene citas.</p>
         ) : (

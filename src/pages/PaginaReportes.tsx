@@ -12,6 +12,7 @@ import {
 } from 'recharts';
 import { useApi } from '@/hooks/useApi';
 import type { CitaApi, CitasPorEspecialidad } from '@/types/api';
+import { AlertaBanner, EstadoVacio, ErrorBoundary } from '@/shared/components/ui';
 
 function fechaLocal(d: Date): string {
   const mes = String(d.getMonth() + 1).padStart(2, '0');
@@ -30,29 +31,6 @@ function ultimos7Dias(): Date[] {
 
 function Skeleton() {
   return <div className="h-[300px] w-full animate-pulse rounded-xl bg-slate-100" />;
-}
-
-function Vacio({ mensaje }: { mensaje: string }) {
-  return (
-    <div className="flex h-[300px] items-center justify-center rounded-xl border border-dashed border-slate-200 text-sm text-slate-400">
-      {mensaje}
-    </div>
-  );
-}
-
-function ErrorCarga({ mensaje, onReintentar }: { mensaje: string; onReintentar: () => void }) {
-  return (
-    <div className="flex h-[300px] flex-col items-center justify-center gap-3 rounded-xl bg-rose-50 text-sm text-rose-700">
-      <p>{mensaje}</p>
-      <button
-        type="button"
-        onClick={onReintentar}
-        className="rounded-lg bg-rose-600 px-3 py-1.5 font-semibold text-white hover:bg-rose-700"
-      >
-        Reintentar
-      </button>
-    </div>
-  );
 }
 
 function Tarjeta({ titulo, children }: { titulo: string; children: ReactNode }) {
@@ -95,9 +73,13 @@ export default function PaginaReportes() {
           {especialidades.cargando ? (
             <Skeleton />
           ) : especialidades.error ? (
-            <ErrorCarga mensaje={especialidades.error} onReintentar={especialidades.recargar} />
+            <AlertaBanner
+              tipo="error"
+              mensaje={especialidades.error}
+              accion={{ label: 'Reintentar', onClick: especialidades.recargar }}
+            />
           ) : datosEspecialidades.length === 0 ? (
-            <Vacio mensaje="No hay especialidades registradas" />
+            <EstadoVacio titulo="No hay especialidades registradas" />
           ) : (
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={datosEspecialidades}>
@@ -115,19 +97,25 @@ export default function PaginaReportes() {
           {citas.cargando ? (
             <Skeleton />
           ) : citas.error ? (
-            <ErrorCarga mensaje={citas.error} onReintentar={citas.recargar} />
+            <AlertaBanner
+              tipo="error"
+              mensaje={citas.error}
+              accion={{ label: 'Reintentar', onClick: citas.recargar }}
+              />
           ) : !hayCitasEnLaSemana ? (
-            <Vacio mensaje="No hay citas en los últimos 7 días" />
+            <EstadoVacio titulo="No hay especialidades registradas" />
           ) : (
-            <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={datosPorDia}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                <XAxis dataKey="dia" tick={{ fontSize: 12 }} />
-                <YAxis allowDecimals={false} />
-                <Tooltip />
-                <Line type="monotone" dataKey="total" name="Citas" stroke="#0d9488" strokeWidth={2} dot={{ r: 4 }} />
-              </LineChart>
-            </ResponsiveContainer>
+            <ErrorBoundary fallback={<AlertaBanner tipo="error" mensaje="No se pudo dibujar esta gráfica." />}>
+              <ResponsiveContainer width="100%" height={300}>
+                <LineChart data={datosPorDia}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                  <XAxis dataKey="dia" tick={{ fontSize: 12 }} />
+                  <YAxis allowDecimals={false} />
+                  <Tooltip />
+                  <Line type="monotone" dataKey="total" name="Citas" stroke="#0d9488" strokeWidth={2} dot={{ r: 4 }} />
+                </LineChart>
+              </ResponsiveContainer>
+            </ErrorBoundary>
           )}
         </Tarjeta>
       </div>

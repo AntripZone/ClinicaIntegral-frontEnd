@@ -25,7 +25,7 @@ export const usePacientesStore = create<PacientesState>()(
       total: 0,
       pagina: 1,
       totalPaginas: 1,
-      cargando: false,
+      cargando: true,
       error: null,
 
       cargar: async (query) => {

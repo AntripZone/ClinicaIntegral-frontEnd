@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { NavLink, Outlet, useNavigate, Link } from 'react-router-dom';
+import { NavLink, Outlet, useNavigate, Link, useLocation } from 'react-router-dom';
 import { History,LayoutDashboard, Users, CalendarPlus, Menu, X, CalendarDays, BarChart3, LogOut } from 'lucide-react';
 import { useAuthStore } from '@/stores/authStore';
 import { urlArchivo } from '@/lib/urls';
+import { AlertaBanner, ErrorBoundary } from '@/shared/components/ui';
 
 const enlaces = [
   { to: '/', label: 'Dashboard', icon: LayoutDashboard },
@@ -14,6 +15,7 @@ const enlaces = [
 ];
 
 export default function Layout() {
+  const location = useLocation();
   const usuario = useAuthStore((s) => s.usuario);
   const logout = useAuthStore((s) => s.logout);
   const navigate = useNavigate();
@@ -134,7 +136,18 @@ export default function Layout() {
         </div>
 
         <main className="flex-1 p-6 lg:p-8">
+           <ErrorBoundary
+              key={location.pathname}
+              fallback={
+                <AlertaBanner
+                  tipo="error"
+                  titulo="Esta sección tuvo un problema"
+                  mensaje="Ocurrió un error inesperado. Puedes ir a otra sección desde el menú o recargar la página."
+                />
+              }
+            >
           <Outlet />
+          </ErrorBoundary>
         </main>
       </div>
     </div>

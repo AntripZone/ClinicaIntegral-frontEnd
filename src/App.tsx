@@ -12,6 +12,7 @@ import PaginaSinAcceso from '@/pages/PaginaSinAcceso';
 import RutaProtegida from '@/components/RutaProtegida';
 import PaginaPerfil from '@/pages/PaginaPerfil';
 import PaginaHistorialCitas from '@/pages/PaginaHistorialCitas';
+import { AlertaBanner, ErrorBoundary } from '@/shared/components/ui';
 
 export default function App() {
   return (
@@ -30,7 +31,12 @@ export default function App() {
         <Route path="/citas/historial" element={<PaginaHistorialCitas />} />
 
         <Route element={<RutaProtegida rolesPermitidos={['GERENCIA']} />}>
-           <Route path="/reportes" element={<PaginaReportes />} />
+           <Route path="/reportes" element={
+              <ErrorBoundary fallback={<AlertaBanner tipo="error" mensaje="Error al cargar reportes" />}>
+                <PaginaReportes />
+              </ErrorBoundary>
+             }
+          />
         </Route>
 
         <Route path="*" element={<PaginaNotFound />} />

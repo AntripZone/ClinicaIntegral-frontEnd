@@ -3,11 +3,17 @@ import { Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import toast from 'react-hot-toast';
-import { Loader2, X } from 'lucide-react';
+import { X } from 'lucide-react';
 import { useDebounce } from '@/hooks/useDebounce';
 import { pacienteSchema, type PacienteFormData } from '@/schemas/pacienteSchema';
 import { extraerMensajeError } from '@/lib/errorHandler';
-import ModalConfirmacion from '@/components/ModalConfimacion';
+import {
+  AlertaBanner,
+  EstadoVacio,
+  ModalConfirmacion,
+  SkeletonPacienteRow,
+  Spinner,
+} from '@/shared/components/ui';
 import { usePacientesStore } from '@/stores/pacientesStore';
 import { useFiltrosStore } from '@/stores/filtrosStore';
 import type { PacienteApi } from '@/types/api';
@@ -37,11 +43,13 @@ export default function PaginaPacientes() {
 
   const [aEliminar, setAEliminar] = useState<PacienteApi | null>(null);
   const [eliminando, setEliminando] = useState(false);
+  const [abrirFormulario, setAbrirFormulario] = useState(false);
 
   const {
     register,
     handleSubmit,
     reset,
+    setFocus,
     formState: { errors, isSubmitting },
   } = useForm<PacienteFormData>({
     resolver: zodResolver(pacienteSchema),
@@ -49,6 +57,10 @@ export default function PaginaPacientes() {
   });
 
   const queryDebounced = useDebounce(query, 350);
+
+  useEffect(() => {
+    if (abrirFormulario) setFocus('nombre');
+  }, [abrirFormulario, setFocus]);
 
   useEffect(() => {
     cargar(queryDebounced || undefined);
@@ -61,6 +73,7 @@ export default function PaginaPacientes() {
       await crear({ ...data, direccion: data.direccion?.trim() ? data.direccion : null });
       toast.success('Paciente registrado');
       reset(valoresIniciales);
+      setAbrirFormulario(false)
     } catch (err) {
       toast.error(extraerMensajeError(err));
     }
@@ -87,38 +100,49 @@ export default function PaginaPacientes() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-slate-800">Pacientes</h1>
-
-      <form
-        onSubmit={handleSubmit(onSubmit)}
-        noValidate
-        className="grid gap-4 rounded-2xl border border-slate-200 bg-white p-5 sm:grid-cols-2"
-      >
-        <h2 className="text-lg font-semibold text-slate-800 sm:col-span-2">Registrar paciente</h2>
-        {(
-          [
-            ['nombre', 'Nombre', 'text'],
-            ['apellido', 'Apellido', 'text'],
-            ['email', 'Email', 'email'],
-            ['telefono', 'Teléfono (9 dígitos)', 'tel'],
-            ['fechaNacimiento', 'Fecha de nacimiento', 'date'],
-            ['direccion', 'Dirección (opcional)', 'text'],
-          ] as const
-        ).map(([campo, label, tipo]) => (
-          <div key={campo}>
-            <label htmlFor={campo} className="mb-1 block text-sm font-medium text-slate-700">{label}</label>
-            <input id={campo} type={tipo} {...register(campo)} className={claseCampo(!!errors[campo])} />
-            {errors[campo] && <p className="mt-1 text-sm text-rose-600">{errors[campo]?.message}</p>}
-          </div>
-        ))}
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h1 className="text-2xl font-bold text-slate-800">Pacientes</h1>
         <button
-          type="submit"
-          disabled={isSubmitting}
-          className="rounded-lg bg-teal-600 px-4 py-2 text-sm font-semibold text-white hover:bg-teal-700 disabled:opacity-60 sm:col-span-2 sm:justify-self-start"
+          type="button"
+          onClick={() => setAbrirFormulario((v) => !v)}
+          className="rounded-lg bg-teal-600 px-4 py-2 text-sm font-semibold text-white hover:bg-teal-700"
         >
-          {isSubmitting ? 'Registrando...' : 'Registrar'}
+          {abrirFormulario ? 'Cerrar formulario' : 'Agregar paciente'}
         </button>
-      </form>
+      </div>
+
+      {abrirFormulario && (
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          noValidate
+          className="grid gap-4 rounded-2xl border border-slate-200 bg-white p-5 sm:grid-cols-2"
+        >
+          <h2 className="text-lg font-semibold text-slate-800 sm:col-span-2">Registrar paciente</h2>
+          {(
+            [
+              ['nombre', 'Nombre', 'text'],
+              ['apellido', 'Apellido', 'text'],
+              ['email', 'Email', 'email'],
+              ['telefono', 'Teléfono (9 dígitos)', 'tel'],
+              ['fechaNacimiento', 'Fecha de nacimiento', 'date'],
+              ['direccion', 'Dirección (opcional)', 'text'],
+            ] as const
+          ).map(([campo, label, tipo]) => (
+            <div key={campo}>
+              <label htmlFor={campo} className="mb-1 block text-sm font-medium text-slate-700">{label}</label>
+              <input id={campo} type={tipo} {...register(campo)} className={claseCampo(!!errors[campo])} />
+              {errors[campo] && <p className="mt-1 text-sm text-rose-600">{errors[campo]?.message}</p>}
+            </div>
+          ))}
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="rounded-lg bg-teal-600 px-4 py-2 text-sm font-semibold text-white hover:bg-teal-700 disabled:opacity-60 sm:col-span-2 sm:justify-self-start"
+          >
+            {isSubmitting ? 'Registrando...' : 'Registrar'}
+          </button>
+        </form>
+      )}
       <div className="flex flex-wrap items-center gap-3">
         <div className="relative w-full max-w-sm">
 
@@ -129,7 +153,9 @@ export default function PaginaPacientes() {
         className="w-full max-w-sm rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
       />
       {buscando && (
-      <Loader2 className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-teal-600" />
+        <span className="absolute right-3 top-1/2 -translate-y-1/2">
+          <Spinner etiqueta="Buscando pacientes" />
+        </span>
       )}
       </div>
       <button
@@ -143,20 +169,19 @@ export default function PaginaPacientes() {
       </button>
     </div>
       {cargando && pacientes.length === 0 ? (
-        <div className="flex h-40 items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin text-teal-600" />
-        </div>
-      ) : error ? (
-        <div className="rounded-2xl border border-rose-200 bg-rose-50 p-8 text-center">
-          <p className="font-medium text-rose-700">No se pudieron cargar los pacientes: {error}</p>
-          <button
-            type="button"
-            onClick={() => cargar(query)}
-            className="mt-4 rounded-lg bg-rose-600 px-4 py-2 text-sm font-semibold text-white hover:bg-rose-700"
-          >
-            Reintentar
-          </button>
-        </div>
+        query ? (
+          <EstadoVacio
+            titulo={`Sin resultados para "${query}"`}
+            descripcion="Prueba con otro nombre, apellido o email."
+            accion={{ label: 'Limpiar filtros', onClick: resetFiltros }}
+          />
+        ) : (
+          <EstadoVacio
+            titulo="No hay pacientes registrados"
+            descripcion="Registra el primero para empezar a agendar citas."
+            accion={{ label: 'Agregar paciente', onClick: () => setAbrirFormulario(true) }}
+          />
+        )
       ) : (
         <>
           <p className="text-sm text-slate-500">{total} paciente(s) registrado(s)</p>

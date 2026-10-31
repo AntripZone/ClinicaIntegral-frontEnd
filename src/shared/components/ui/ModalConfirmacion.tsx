@@ -4,6 +4,7 @@ interface ModalConfirmacionProps {
   mensaje: string;
   textoConfirmar?: string;
   cargando?: boolean;
+  textoCargando?: string;
   onConfirmar: () => void;
   onCancelar: () => void;
 }
@@ -13,6 +14,7 @@ export default function ModalConfirmacion({
   titulo,
   mensaje,
   textoConfirmar = 'Eliminar',
+  textoCargando = 'Eliminando...',
   cargando = false,
   onConfirmar,
   onCancelar,
@@ -43,7 +45,7 @@ export default function ModalConfirmacion({
             disabled={cargando}
             className="rounded-lg bg-rose-600 px-4 py-2 text-sm font-semibold text-white hover:bg-rose-700 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {cargando ? 'Eliminando...' : textoConfirmar}
+            {cargando ? textoCargando : textoConfirmar}
           </button>
         </div>
       </div>

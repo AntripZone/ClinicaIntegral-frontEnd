@@ -4,6 +4,7 @@ import { MetricCard } from '../components/MetricCard';
 import { StatusBadge } from '../components/StatusBadge';
 import { useApi } from '@/hooks/useApi';
 import type { Metrica } from '../types';
+import { AlertaBanner, SkeletonMetricCard } from '@/shared/components/ui';
 import type { CitaApi, MedicoApi, PacienteApi, RespuestaPaginada } from '@/types/api';
 
 export function PaginaDashboard() {
@@ -12,6 +13,9 @@ export function PaginaDashboard() {
   const medicos = useApi<MedicoApi[]>('/medicos');
   const programadas = useApi<CitaApi[]>('/citas?estado=PROGRAMADA');
   const completadas = useApi<CitaApi[]>('/citas?estado=COMPLETADA');
+  const fuentes = [pacientes, medicos, programadas, completadas];
+  const hayError = fuentes.some((f) => f.error);
+  const recargarTodo = () => fuentes.forEach((f) => f.recargar());
 
   const [mantenimiento, setMantenimiento] = useState<boolean>(false);
 
@@ -19,7 +23,7 @@ export function PaginaDashboard() {
     {
       id: 'pacientes',
       titulo: 'Pacientes',
-      valor: pacientes.data?.total ?? '…',
+      valor: pacientes.data?.total ?? '-',
       descripcion: 'Registrados en el sistema',
       tendencia: 'positiva',
       icono: '🧑‍⚕️',
@@ -27,7 +31,7 @@ export function PaginaDashboard() {
     {
       id: 'medicos',
       titulo: 'Médicos',
-      valor: medicos.data?.length ?? '…',
+      valor: medicos.data?.length ?? '-',
       descripcion: 'En el staff',
       tendencia: 'neutra',
       icono: '🩺',
@@ -35,7 +39,7 @@ export function PaginaDashboard() {
     {
       id: 'citas-programadas',
       titulo: 'Citas Programadas',
-      valor: programadas.data?.length ?? '…',
+      valor: programadas.data?.length ?? '-',
       descripcion: 'Pendientes de atención',
       tendencia: 'neutra',
       icono: '📅',
@@ -43,7 +47,7 @@ export function PaginaDashboard() {
     {
       id: 'citas-completadas',
       titulo: 'Completadas Hoy',
-      valor: completadas.data?.length ?? '…',
+      valor: completadas.data?.length ?? '-',
       descripcion: 'Atenciones finalizadas',
       tendencia: 'positiva',
       icono: '✅',
@@ -79,10 +83,24 @@ export function PaginaDashboard() {
         </div>
       </header>
 
+      {hayError && (
+        <div className="mb-4">
+          <AlertaBanner
+            tipo="advertencia"
+            mensaje="Algunas métricas no se pudieron cargar."
+            accion={{ label: 'Reintentar', onClick: recargarTodo }}
+          />
+        </div>
+      )}
+
       <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {metricas.map((metrica) => (
-          <MetricCard key={metrica.id} metrica={metrica} />
-        ))}
+        {metricas.map((metrica, i) =>
+          fuentes[i].cargando ? (
+            <SkeletonMetricCard key={metrica.id} />
+          ) : (
+            <MetricCard key={metrica.id} metrica={metrica} />
+          ),
+        )}
       </section>
       <div className="mt-6">
         <Link to="/reportes" className="text-sm font-semibold text-teal-700 hover:underline">

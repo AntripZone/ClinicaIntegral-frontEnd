@@ -1,10 +1,9 @@
-import { useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import PaginaNotFound from '@/pages/PaginaNotFound';
-import { useCitasStore } from '@/stores/citasStore';
 import { useApi } from '@/hooks/useApi';
 import type { PacienteApi } from '@/types/api';
 import { Spinner } from '@/shared/components/ui';
+import { useCitas } from '@/hooks/useCitas';
 
 export default function PaginaDetallePaciente() {
   const { id } = useParams<{ id: string }>();
@@ -13,15 +12,12 @@ export default function PaginaDetallePaciente() {
 
   const { data: paciente, cargando: cargandoPaciente } = useApi<PacienteApi>(`/pacientes/${id}`);
 
-  const citas = useCitasStore((s) => s.citas);
-  const cargandoCitas = useCitasStore((s) => s.cargando);
-  const citaSeleccionada = useCitasStore((s) => s.citaSeleccionada);
-  const cargarPorPaciente = useCitasStore((s) => s.cargarPorPaciente);
-  const seleccionar = useCitasStore((s) => s.seleccionar);
-
-  useEffect(() => {
-    if (pacienteId) cargarPorPaciente(pacienteId);
-  }, [pacienteId, cargarPorPaciente]);
+  const {
+      citas,
+      cargando: cargandoCitas,
+      citaSeleccionada,
+      seleccionar,
+    } = useCitas({ pacienteId, cargarAlMontar: pacienteId > 0 });
 
   if (cargandoPaciente)
     return <Spinner fullscreen etiqueta="Cargando paciente" />;

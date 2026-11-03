@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import {
@@ -7,8 +7,8 @@ import {
   ModalConfirmacion,
   SkeletonCitaRow,
 } from '@/shared/components/ui';
-import { useCitasStore } from '@/stores/citasStore';
 import { useFiltrosStore } from '@/stores/filtrosStore';
+import { useCitas } from '@/hooks/useCitas';
 import type { EstadoCita } from '@/types/api';
 
 const estiloPorEstado: Record<EstadoCita, string> = {
@@ -25,23 +25,15 @@ const etiquetaPorEstado: Record<EstadoCita, string> = {
 
 export default function PaginaCitas() {
   const navigate = useNavigate();
-  const citas = useCitasStore((s) => s.citas);
-  const cargando = useCitasStore((s) => s.cargando);
-  const error = useCitasStore((s) => s.error);
-  const cargar = useCitasStore((s) => s.cargar);
-  const actualizarEstado = useCitasStore((s) => s.actualizarEstado);
 
   const [aCancelar, setACancelar] = useState<number | null>(null);
   const [cancelando, setCancelando] = useState(false);
 
   const estadoFiltro = useFiltrosStore((s) => s.estadoCitaFiltro);
   const setEstadoFiltro = useFiltrosStore((s) => s.setEstadoCita);
-
-  const recargar = () => cargar(estadoFiltro === 'Todos' ? undefined : estadoFiltro);
-
-  useEffect(() => {
-    cargar(estadoFiltro === 'Todos' ? undefined : estadoFiltro);
-  }, [estadoFiltro, cargar]);
+  const { citas, cargando, error, recargar, actualizarEstado } = useCitas({
+    estado: estadoFiltro === 'Todos' ? undefined : estadoFiltro,
+  });
 
   const cambiarEstado = (id: number, estado: EstadoCita) => {
     if (estado === 'CANCELADA') {

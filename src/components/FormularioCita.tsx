@@ -5,9 +5,9 @@ import toast from 'react-hot-toast';
 import { citaSchema, hoyISO, type CitaFormData } from '@/schemas/citaSchema';
 import { useMedicos } from '@/hooks/useMedicos';
 import { useApi } from '@/hooks/useApi';
-import { useCitasStore } from '@/stores/citasStore';
 import { extraerMensajeError } from '@/lib/errorHandler';
 import type { PacienteApi, RespuestaPaginada } from '@/types/api';
+import { useCitas } from '@/hooks/useCitas';
 
 const etiquetaUrgencia: Record<CitaFormData['urgencia'], string> = {
   baja: 'Baja',
@@ -26,11 +26,11 @@ const valoresIniciales: CitaFormData = {
 };
 
 export default function FormularioCita() {
+  const { agregarCita } = useCitas({ cargarAlMontar: false });
   const { medicos, cargando: cargandoMedicos } = useMedicos();
   const pacientesApi = useApi<RespuestaPaginada<PacienteApi>>('/pacientes?limite=100');
   const pacientes = pacientesApi.data?.data ?? [];
 
-  const agregarCita = useCitasStore((s) => s.agregarCita);
   const [citaConfirmada, setCitaConfirmada] = useState<CitaFormData | null>(null);
 
   const {

@@ -1,4 +1,4 @@
-export { default as AlertaBanner } from "./AlertBanner";
+export { default as AlertaBanner } from "./AlertaBanner";
 export { default as EstadoVacio } from "./EstadoVacio";
 export { default as ErrorBoundary } from "./ErrorBoundary";
 export { default as ModalConfirmacion } from "./ModalConfirmacion";

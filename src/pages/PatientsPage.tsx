@@ -8,15 +8,14 @@ import { useDebounce } from '@/hooks/useDebounce';
 import { pacienteSchema, type PacienteFormData } from '@/schemas/pacienteSchema';
 import { extraerMensajeError } from '@/lib/errorHandler';
 import {
-  AlertaBanner,
   EstadoVacio,
   ModalConfirmacion,
-  SkeletonPacienteRow,
   Spinner,
 } from '@/shared/components/ui';
-import { usePacientesStore } from '@/stores/pacientesStore';
 import { useFiltrosStore } from '@/stores/filtrosStore';
 import type { PacienteApi } from '@/types/api';
+import { usePacientes } from '@/hooks/usePacientes';
+
 
 const valoresIniciales: PacienteFormData = {
   nombre: '',
@@ -28,17 +27,12 @@ const valoresIniciales: PacienteFormData = {
 };
 
 export default function PaginaPacientes() {
-  const pacientes = usePacientesStore((s) => s.pacientes);
-  const total = usePacientesStore((s) => s.total)
+
   const resetFiltros = useFiltrosStore((s) => s.resetFiltros);
-  const cargando = usePacientesStore((s) => s.cargando);
-  const error = usePacientesStore((s) => s.error);
-  const cargar = usePacientesStore((s) => s.cargar);
-  const crear = usePacientesStore((s) => s.crear);
-  const eliminar = usePacientesStore((s) => s.eliminar);
-
-
   const query = useFiltrosStore((s) => s.queryPacientes);
+  const queryDebounced = useDebounce(query, 350);
+  const { pacientes, total, cargando, crear, eliminar } = usePacientes(queryDebounced);
+
   const setQuery = useFiltrosStore((s) => s.setQueryPacientes);
 
   const [aEliminar, setAEliminar] = useState<PacienteApi | null>(null);
@@ -56,15 +50,9 @@ export default function PaginaPacientes() {
     defaultValues: valoresIniciales,
   });
 
-  const queryDebounced = useDebounce(query, 350);
-
   useEffect(() => {
     if (abrirFormulario) setFocus('nombre');
   }, [abrirFormulario, setFocus]);
-
-  useEffect(() => {
-    cargar(queryDebounced || undefined);
-  }, [queryDebounced, cargar]);
 
   const buscando = query !== queryDebounced || cargando;
 

@@ -24,13 +24,13 @@ export default function ModalConfirmacion({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div
-        className="absolute inset-0 bg-slate-900/40"
+        className="absolute inset-0 bg-slate-900/40 dark:bg-slate-950/70"
         onClick={cargando ? undefined : onCancelar}
       />
       <div role="dialog" aria-modal="true" className="relative w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
-        <h2 className="text-lg font-bold text-slate-800">{titulo}</h2>
+        <h2 className="text-lg font-bold text-slate-800 dark:bg-slate-950/70">{titulo}</h2>
         <p className="mt-2 text-sm text-slate-600">{mensaje}</p>
-        <div className="mt-6 flex justify-end gap-3">
+        <div className="mt-6 flex justify-end gap-3 dark:bg-slate-950/70">
           <button
             type="button"
             onClick={onCancelar}

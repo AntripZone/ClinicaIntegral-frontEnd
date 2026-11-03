@@ -3,6 +3,7 @@ export { default as EstadoVacio } from "./EstadoVacio";
 export { default as ErrorBoundary } from "./ErrorBoundary";
 export { default as ModalConfirmacion } from "./ModalConfirmacion";
 export { default as Spinner } from "./Spinner";
+export { default as BotonTema } from "./BotonTema";
 export {
   SkeletonMetricCard,
   SkeletonPacienteRow,

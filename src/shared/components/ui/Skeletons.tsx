@@ -1,17 +1,17 @@
 function Linea({ alto, barra }: { alto: string; barra: string }) {
   return (
     <div className={`flex ${alto} items-center`}>
-      <div className={`animate-pulse rounded bg-slate-200 ${barra}`} />
+      <div className={`animate-pulse rounded bg-slate-200 dark:bg-slate-700 ${barra}`} />
     </div>
   );
 }
 
 export function SkeletonMetricCard() {
   return (
-    <div aria-hidden="true" className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+    <div aria-hidden="true" className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
       <div className="flex items-center justify-between">
         <Linea alto="h-5" barra="h-3.5 w-24" />
-        <div className="h-8 w-8 animate-pulse rounded-full bg-slate-100" />
+        <div className="h-8 w-8 animate-pulse rounded-full bg-slate-100 dark:bg-slate-800" />
       </div>
       <div className="mt-2"><Linea alto="h-9" barra="h-7 w-16" /></div>
       <div className="mt-1"><Linea alto="h-5" barra="h-3 w-32" /></div>

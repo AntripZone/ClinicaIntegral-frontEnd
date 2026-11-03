@@ -12,9 +12,9 @@ const colorPorTendencia: Record<Tendencia, string> = {
 
 export function MetricCard({ metrica }: MetricCardProps) {
   return (
-    <article className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-      <div className="flex items-center justify-between">
-        <h3 className="text-sm font-medium text-slate-500">{metrica.titulo}</h3>
+    <article className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+      <div className="flex items-center justify-between dark:text-slate-400">
+        <h3 className="text-sm font-medium text-slate-500 dark:text-slate-100">{metrica.titulo}</h3>
         <span className="text-2xl" aria-hidden="true">{metrica.icono}</span>
       </div>
       <p className="mt-2 text-3xl font-bold text-slate-900">{metrica.valor}</p>

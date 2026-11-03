@@ -1,6 +1,14 @@
 <!doctype html>
-<html lang="en">
+<html lang="es">
   <head>
+    <script>
+      try {
+        var guardado = JSON.parse(localStorage.getItem('tema-storage'));
+        var tema = guardado ? guardado.state.tema
+          : (matchMedia('(prefers-color-scheme: dark)').matches ? 'oscuro' : 'claro');
+        if (tema === 'oscuro') document.documentElement.classList.add('dark');
+      } catch (e) {}
+    </script>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />

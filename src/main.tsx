@@ -8,7 +8,7 @@ import App from './App.tsx'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <BrowserRouter>
+    <BrowserRouter basename={import.meta.env.BASE_URL}>
       <App />
       <Toaster position="top-right" toastOptions={{ className: 'dark:bg-slate-800! dark:text-slate-100!' }}/>
     </BrowserRouter>
